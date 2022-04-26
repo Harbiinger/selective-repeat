@@ -1,0 +1,1 @@
+rm reso/examples/selectiverepeat/*.class && echo "> .class files deleted"
