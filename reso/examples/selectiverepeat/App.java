@@ -7,9 +7,11 @@ import reso.ip.IPAddress;
 
 public class App extends AbstractApplication {
 	
-	private final IPLayer ip;
+	private final IPLayer   ip;
+    private final IPAddress dst;
+    private final int       num;
 
-	public App(IPHost host, IPAdress dst, int num) {
+	public App(IPHost host, IPAddress dst, int num) {
 		super(host, "app");
 		ip       = host.getIPLayer();
 		this.dst = dst;
