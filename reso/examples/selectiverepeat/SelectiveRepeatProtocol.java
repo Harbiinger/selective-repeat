@@ -9,6 +9,7 @@ import reso.ip.IPInterfaceListener;
 public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 	private final IPHost host;
+	private final int    windowSize;
 
 	public SelectiveRepeatProtocol(IPHost host) {
 		this.host = host;
