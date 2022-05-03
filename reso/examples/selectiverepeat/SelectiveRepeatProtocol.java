@@ -37,8 +37,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
     		super(scheduler, interval, false);
     	}
     	protected void run() throws Exception {
-			System.out.println("app=[" + host.getIPLayer() + "]" +
-					" time=" + scheduler.getCurrentTime());
+			// TODO : Mettre ici le code a run une fois le timer expiré
 		}
     }
     
