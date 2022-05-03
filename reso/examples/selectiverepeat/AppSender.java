@@ -9,18 +9,18 @@ public class AppSender extends AbstractApplication {
 	
 	private final IPLayer   ip;
 	private final IPAddress dst;
-	private final int       num;
+	private final String    message;
 
-	public AppSender(IPHost host, IPAddress dst, int num) {
+	public AppSender(IPHost host, IPAddress dst, String message) {
 		super(host, "sender");
 		this.dst = dst;
-		this.num = num;
+		this.message = message;
 		ip       = host.getIPLayer();
 	}
 
 	public void start() throws Exception {
-		// I guess we have to add our protocol here :
-		ip.addListener(>PROTOCOL<);
+    	ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host));
+		ip.send(IPAddress.ANY, dst, SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatMessage(message));
 	}
 
 	public void stop() {
