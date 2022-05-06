@@ -13,9 +13,10 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public static final int IP_PROTO_SELECTIVE_REPEAT= Datagram.allocateProtocolNumber("SELECTIVE_REPEAT");
 
 
-	private final IPHost host;
-	private final int windowSize;
-	private AbstractTimer timer;
+	private final IPHost        host;
+	private       AbstractTimer timer;
+	private       int           windowSize;
+	private       int           sendBase;   // sequence number of the fist packet in the window
 
 
 	public SelectiveRepeatProtocol(IPHost host) {

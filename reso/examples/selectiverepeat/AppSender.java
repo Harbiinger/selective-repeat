@@ -13,9 +13,9 @@ public class AppSender extends AbstractApplication {
 
 	public AppSender(IPHost host, IPAddress dst, String message) {
 		super(host, "sender");
-		this.dst = dst;
+		this.dst     = dst;
 		this.message = message;
-		ip       = host.getIPLayer();
+		ip           = host.getIPLayer();
 	}
 
 	public void start() throws Exception {

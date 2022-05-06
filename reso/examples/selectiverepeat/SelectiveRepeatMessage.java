@@ -2,8 +2,7 @@ package reso.examples.selectiverepeat;
 
 import reso.common.Message;
 
-public class SelectiveRepeatMessage
-implements Message {
+public class SelectiveRepeatMessage implements Message {
 	
 	public final String message; 
 	
@@ -12,13 +11,11 @@ implements Message {
     }
 	
 	public String toString() {
-		return "Selective Repeat [=" + message + "]";
+		return "Selective Repeat [message=" + message + "]";
 	}
 
 	@Override
 	public int getByteLength() {
-		// The selective repeat message carries a single 'int'
-		return Integer.SIZE / 8;
 	}
 
 }
