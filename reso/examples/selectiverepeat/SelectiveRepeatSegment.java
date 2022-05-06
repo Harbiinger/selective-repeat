@@ -2,11 +2,11 @@ package reso.examples.selectiverepeat;
 
 import reso.common.Message;
 
-public class SelectiveRepeatMessage implements Message {
+public class SelectiveRepeatSegment implements Message {
 	
 	public final String message; 
 	
-	public SelectiveRepeatMessage(String message) {
+	public SelectiveRepeatSegment(String message) {
         this.message = message;
     }
 	
@@ -16,6 +16,8 @@ public class SelectiveRepeatMessage implements Message {
 
 	@Override
 	public int getByteLength() {
+		// TODO: do
+		return 3;
 	}
 
 }

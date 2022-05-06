@@ -28,8 +28,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 	@Override
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
-		// TODO : our protocol code
-		
+		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
+		System.out.println(payload);
 	}
 
 
@@ -44,7 +44,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
     
     public void start()
     throws Exception {
-    	timer.start();
+    	//timer.start();
     }
     
     public void stop() {

@@ -1,1 +1,2 @@
-javac reso/examples/selectiverepeat/Demo.java && java reso.examples.selectiverepeat.Demo
+#!/bin/bash
+./clean && javac reso/examples/selectiverepeat/Demo.java && java reso.examples.selectiverepeat.Demo && ./clean

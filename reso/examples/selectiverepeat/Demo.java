@@ -9,6 +9,8 @@ import reso.scheduler.Scheduler;
 import reso.utilities.NetworkBuilder;
 
 public class Demo {
+
+    public static String data = "Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It’s not a story the Jedi would tell you. It’s a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.";
 	
 	public static void main(String[] args) {
 		AbstractScheduler scheduler= new Scheduler();
@@ -22,8 +24,8 @@ public class Demo {
     		IPHost host1= NetworkBuilder.createHost(network, "H1", IP_ADDR1, MAC_ADDR1);
     		host1.getIPLayer().addRoute(IP_ADDR2, "eth0");
     		
-			host1.addApplication(new AppSniffer(host1, new String [] {"eth0"}));
-    		host1.addApplication(new AppSender(host1, IP_ADDR2, "UwU"));
+			//host1.addApplication(new AppSniffer(host1, new String [] {"eth0"}));
+    		host1.addApplication(new AppSender(host1, IP_ADDR2, data));
 
     		IPHost host2= NetworkBuilder.createHost(network,"H2", IP_ADDR2, MAC_ADDR2);
     		host2.getIPLayer().addRoute(IP_ADDR1, "eth0");
