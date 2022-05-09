@@ -60,13 +60,14 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
+		windowSize = payload.windowSize;
 		if (payload.acked) {
 			System.out.println(payload);
 			send(messagesList.get(++sendBase), false);
 		}	
 		else {
 			// If we are in slow start/fast recovery
-			if(windowSize <= sstresh){
+			if(windowSize < sstresh){
 				windowSize = windowSize*2;
 				// Make sure that the exponential growth don't go past sstresh
 				if(windowSize > sstresh){
@@ -86,10 +87,10 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 	public void send(String message, boolean acked) throws Exception {
 		if (acked) {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", true));
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", true, windowSize));
 		}
 		else {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, message, false));
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, message, false, windowSize));
 		}
 	}
 
