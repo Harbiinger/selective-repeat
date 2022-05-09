@@ -24,12 +24,13 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       int           sendBase;   // sequence number of the fist packet in the window
 	private       int           seqNum;
 	private ArrayList<String>   messagesList = new ArrayList();
+	private ArrayList<SelectiveRepeatSegment> window = new ArrayList();
 
 
 	public SelectiveRepeatProtocol(IPHost host) {
 		this.host = host;
 		double interval = 5.0;
-		windowSize = 1;
+		windowSize = 8;
 		sendBase = 0;
 		seqNum = 0;
 		timer= new MyTimer(host.getNetwork().getScheduler(), interval);
@@ -49,32 +50,66 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			i += segmentSize;
 		}
 		messagesList.add(message.substring(i, message.length()));
-		send(messagesList.get(0), false);
+		send(false);
 	}
 
 	@Override
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
+		// sender receive an ack
 		if (payload.acked) {
-			System.out.println(payload);
-			send(messagesList.get(++sendBase), false);	
+			for (SelectiveRepeatSegment segment : window) {
+				if (segment.seqNum == payload.seqNum) {
+					segment.acked = true;
+				}	
+			}
+			verifyWindow(); // remove acked segments
+			send(false); // try to send new segments
 		}	
+		// receiver receive a message
 		else {
-			System.out.println(payload);
-			send("", true);
+			System.out.println(payload.message); // debug
+			Tools.log("receiver : received ack for seqNum=" + payload.seqNum);
+			send(true);
 		}
 	}
 
-	public void send(String message, boolean acked) throws Exception {
+	public void send(boolean acked) throws Exception {
+		// send an ack
 		if (acked) {
 			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", true));
+			increaseSeqNum();
+			Tools.log("receiver : increased seqNum : " + seqNum);
 		}
+		// send the payload
 		else {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, message, false));
+			int n = 0;
+			while (window.size() <= windowSize) {	
+				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(sendBase + n++), false);
+				window.add(segment);	
+				host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
+				Tools.log("sender : sent segment from window");
+				increaseSeqNum();
+				Tools.log("sender : increased seqNum : " + seqNum);
+			}
+			Tools.log("sender : window is full");
 		}
 	}
 
+	private void verifyWindow() {
+		for (SelectiveRepeatSegment segment : window) {
+			if (!segment.acked) {
+				break;
+			}
+			window.remove(0);
+			sendBase += 1;
+		}
+	}
+
+	private void increaseSeqNum() {
+		seqNum += 1;
+	}
 
     private class MyTimer extends AbstractTimer {
     	public MyTimer(AbstractScheduler scheduler, double interval) {
@@ -85,8 +120,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		}
     }
     
-    public void start()
-    throws Exception {
+    public void start() throws Exception {
     	//timer.start();
     }
     
