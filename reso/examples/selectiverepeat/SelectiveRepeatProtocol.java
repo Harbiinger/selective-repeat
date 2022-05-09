@@ -65,7 +65,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// sender receive an ack
 		if (payload.acked) {
-			Tools.log("sender", "received ack [seqNum="+payload.seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+"]");
 			for (SelectiveRepeatSegment segment : window) {
 				if (segment.seqNum == payload.seqNum) {
 					segment.acked = true; // the corresponding segment is marked as acked
@@ -77,7 +77,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// receiver receive a message
 		else {
-			Tools.log("receiver", "received message [seqNum="+payload.seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+"]");
 			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
 				sendAck();
 				addToBuffer(payload); // add segment to the buffer in order
@@ -91,10 +91,10 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++));
 			window.add(segment);	
 			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
-			Tools.log("sender", "sent segment [seqNum="+seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+"]");
 			increaseSeqNum();
 		}
-		Tools.log("sender", "window is full");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "window is full");
 	}
 
 	/*
@@ -102,7 +102,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 */
 	public void sendAck() throws Exception {
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, true));
-		Tools.log("receiver", "sent ack [seqNum="+seqNum+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "sent ack [seqNum="+seqNum+"]");
 		increaseSeqNum();
 	}
 

@@ -1,21 +1,16 @@
 package reso.examples.selectiverepeat;
 
-import java.time.LocalDateTime;
-import java.time.format.*;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
 public class Tools {
 	
-	public static void log(String actor, String log) {
+	public static void log(double time, String actor, String log) {
 		try {
 			FileWriter myWriter = new FileWriter("selectiverepeat.log", true);
 			BufferedWriter bw = new BufferedWriter(myWriter);
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm:ss");
-			LocalDateTime now = LocalDateTime.now();
-			String time = now.format(formatter);
-			bw.write("["+time+"] <"+actor+"> ~> "+log);
+			bw.write("["+(int) time+" ms] <"+actor+"> ~> "+log);
 			bw.newLine();
 			bw.close();
 		} catch (IOException e) {
