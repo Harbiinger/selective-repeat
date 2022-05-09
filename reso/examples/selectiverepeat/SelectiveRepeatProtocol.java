@@ -63,7 +63,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 
-		// sender receive an ack
+		// sender receives an ack
 		if (payload.acked) {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+"]");
 			for (SelectiveRepeatSegment segment : window) {
@@ -75,7 +75,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			send();         // try to send new segments
 		}	
 
-		// receiver receive a message
+		// receiver receives a message
 		else {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+"]");
 			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
@@ -157,7 +157,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	}
 
 	/*
-	 * This method increase the sequence number
+	 * This method increases the sequence number
 	 * this is not very useful because we don't use cylic sequence numbers
 	 */
 	private void increaseSeqNum() {
