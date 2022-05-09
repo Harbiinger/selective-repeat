@@ -16,23 +16,25 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public static final int IP_PROTO_SELECTIVE_REPEAT= Datagram.allocateProtocolNumber("SELECTIVE_REPEAT");
 
 	private final IPHost        host;
-	private final int           segmentSize = 8;
+	private final int           segmentSize = 8; // should be rename to messageSize
 	private       IPAddress     dst;
 	private       AbstractTimer timer;
 	private       int           windowSize;
-	private       int           sendBase;   // sequence number of the fist packet in the window
-	private       int           seqNum;
-	private       int           nextSeqNum;
+	private       int           seqBase;    // sequence number of the fist packet in the window
+	private       int           seqNum;     // current sequence number
+	private       int           nextSeqNum; // next sequence number in the window ("cursor")
 
-	private ArrayList<String>                 messagesList = new ArrayList();
-	private ArrayList<SelectiveRepeatSegment> window       = new ArrayList();
+	private ArrayList<String>                 messagesList = new ArrayList(); // data to be send
+	private ArrayList<SelectiveRepeatSegment> window       = new ArrayList(); // sender window
+	private ArrayList<SelectiveRepeatSegment> buffer       = new ArrayList(); // buffer for received messages
+	private String                            data         = "";              // data ready to be delivered to the application layer
 
 
 	public SelectiveRepeatProtocol(IPHost host) {
 		this.host       = host;
 		double interval = 5.0;
 		windowSize      = 8;
-		sendBase        = 0;
+		seqBase         = 0;
 		seqNum          = 0;
 		nextSeqNum      = 0;
 		timer= new MyTimer(host.getNetwork().getScheduler(), interval);
@@ -63,9 +65,10 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// sender receive an ack
 		if (payload.acked) {
+			Tools.log("sender", "received ack [seqNum="+payload.seqNum+"]");
 			for (SelectiveRepeatSegment segment : window) {
 				if (segment.seqNum == payload.seqNum) {
-					segment.acked = true;
+					segment.acked = true; // the corresponding segment is marked as acked
 				}	
 			}
 			verifyWindow(); // remove acked segments
@@ -74,20 +77,22 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// receiver receive a message
 		else {
-			System.out.println(payload);
-			Tools.log("receiver", "received message with seqNum=" + payload.seqNum);
-			sendAck();
+			Tools.log("receiver", "received message [seqNum="+payload.seqNum+"]");
+			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
+				sendAck();
+				addToBuffer(payload); // add segment to the buffer in order
+				verifyBuffer();       // deliver data in order
+			}
 		}
 	}
 
 	public void send() throws Exception {
 		while (window.size() < windowSize) {	
-			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(sendBase + nextSeqNum++));
+			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++));
 			window.add(segment);	
 			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
-			Tools.log("sender", "sent segment from window");
+			Tools.log("sender", "sent segment [seqNum="+seqNum+"]");
 			increaseSeqNum();
-			Tools.log("sender", "increased seqNum : " + seqNum);
 		}
 		Tools.log("sender", "window is full");
 	}
@@ -97,13 +102,12 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 */
 	public void sendAck() throws Exception {
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, true));
-		Tools.log("receiver", "sent an ack with seqNum=" + seqNum);
+		Tools.log("receiver", "sent ack [seqNum="+seqNum+"]");
 		increaseSeqNum();
-		Tools.log("receiver", "increased seqNum : " + seqNum);
 	}
 
 	/*
-	 * This method removes the x first segments from the window
+	 * This method removes the x first segments from the sender window
 	 * if they are acked.
 	 */
 	private void verifyWindow() {
@@ -112,11 +116,50 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				break;
 			}
 			window.remove(0);
-			sendBase   += 1;
+			seqBase    += 1;
 			nextSeqNum -= 1;
 		}
 	}
 
+	/*
+	 * Deliver data to the application layer
+	 * in the right order
+	 */
+	private void verifyBuffer() {
+		for (SelectiveRepeatSegment segment : buffer) {
+			if (segment.seqNum == seqBase) {
+				data    += segment.message; // delivering data 
+				seqBase += 1;               // move the receiver window
+				buffer.remove(segment);
+				System.out.println(segment.message); //debug
+			}
+		}
+	}
+
+	// le pire algorithme du 21e siecle 
+	// auteur : francois vion
+	/*
+	 * Add segment to the buffer in order (sorted by seqNum)
+	 */
+	private void addToBuffer(SelectiveRepeatSegment segment) {
+		if (buffer.size() == 0) {
+			buffer.add(segment);
+		} else {
+			int i = 0;
+			for (SelectiveRepeatSegment s : buffer) {
+				if (segment.seqNum < s.seqNum) {
+					buffer.add(i, segment);
+				}
+				i++;
+			}
+		}
+	// >>> by francois vion <<<
+	}
+
+	/*
+	 * This method increase the sequence number
+	 * this is not very useful because we don't use cylic sequence numbers
+	 */
 	private void increaseSeqNum() {
 		seqNum += 1;
 	}
