@@ -22,7 +22,7 @@ public class SelectiveRepeatSegment implements Message {
 
 	@Override
 	public String toString() {
-		if (acked==1) {
+		if (acked) {
 			return "Selective Repeat [ACK=" + acked + "]";
 		}
 		return "Selective Repeat [message=" + message + "]";

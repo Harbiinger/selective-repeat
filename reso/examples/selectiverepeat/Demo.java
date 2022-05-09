@@ -34,6 +34,10 @@ public class Demo {
     		EthernetInterface h1_eth0= (EthernetInterface) host1.getInterfaceByName("eth0");
     		EthernetInterface h2_eth0= (EthernetInterface) host2.getInterfaceByName("eth0");
     		
+			((IPEthernetAdapter) host1.getIPLayer().getInterfaceByName("eth0")).addARPEntry(IP_ADDR2, MAC_ADDR2);
+			((IPEthernetAdapter) host2.getIPLayer().getInterfaceByName("eth0")).addARPEntry(IP_ADDR1, MAC_ADDR1);
+
+
     		// Connect both interfaces with a 5000km long link
     		new Link<EthernetFrame>(h1_eth0, h2_eth0, 5000000, 100000);
 
