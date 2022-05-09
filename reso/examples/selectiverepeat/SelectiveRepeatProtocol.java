@@ -21,6 +21,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       IPAddress     dst;
 	private       AbstractTimer timer;
 	private       int           windowSize;
+	private		  int 			dupAckNb;
+	private       int           sstresh;
 	private       int           sendBase;   // sequence number of the fist packet in the window
 	private       int           seqNum;
 	private ArrayList<String>   messagesList = new ArrayList();
@@ -32,6 +34,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		windowSize = 1;
 		sendBase = 0;
 		seqNum = 0;
+		dupAckNb = 0;
+		sstresh = 200;
 		timer= new MyTimer(host.getNetwork().getScheduler(), interval);
 	}
 
@@ -58,11 +62,25 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 		if (payload.acked) {
 			System.out.println(payload);
-			send(messagesList.get(++sendBase), false);	
+			send(messagesList.get(++sendBase), false);
 		}	
 		else {
+			// If we are in slow start/fast recovery
+			if(windowSize <= sstresh){
+				windowSize = windowSize*2;
+				// Make sure that the exponential growth don't go past sstresh
+				if(windowSize > sstresh){
+					windowSize = sstresh;
+				}
+			} else{
+				windowSize++;
+			}
 			System.out.println(payload);
 			send("", true);
+		}
+		if(dupAckNb == 3){
+			windowSize = windowSize/2;
+			dupAckNb = 0; 
 		}
 	}
 
@@ -76,12 +94,19 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	}
 
 
+
+
     private class MyTimer extends AbstractTimer {
     	public MyTimer(AbstractScheduler scheduler, double interval) {
     		super(scheduler, interval, false);
     	}
     	protected void run() throws Exception {
 			// TODO : Mettre ici le code a run une fois le timer expiré
+
+			// Set the sstresh to the half of windows size and reset the window size to 1
+			sstresh = windowSize/2;
+			windowSize = 1;
+			
 		}
     }
     
