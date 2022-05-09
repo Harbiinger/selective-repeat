@@ -19,8 +19,10 @@ public class AppSender extends AbstractApplication {
 	}
 
 	public void start() throws Exception {
-    	ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host));
-		ip.send(IPAddress.ANY, dst, SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(message));
+		SelectiveRepeatProtocol protocol = new SelectiveRepeatProtocol((IPHost) host, 8);
+    	ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host, 8));
+		//ip.send(IPAddress.ANY, dst, SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(message));
+		protocol.sendMessage(dst, message);
 	}
 
 	public void stop() {
