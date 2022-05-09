@@ -16,7 +16,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public static final int IP_PROTO_SELECTIVE_REPEAT= Datagram.allocateProtocolNumber("SELECTIVE_REPEAT");
 
 	private final IPHost        host;
-	private final int           segmentSize = 8; // should be rename to messageSize
+	private final int           segmentSize = 8; // should be renamed to messageSize
 	private       IPAddress     dst;
 	private       AbstractTimer timer;
 	private       int           windowSize;
