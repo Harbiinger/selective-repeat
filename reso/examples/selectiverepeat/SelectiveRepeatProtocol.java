@@ -23,6 +23,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       int           windowSize;
 	private       int           sendBase;   // sequence number of the fist packet in the window
 	private       int           seqNum;
+	private       int           nextSeqNum;
 	private ArrayList<String>   messagesList = new ArrayList();
 	private ArrayList<SelectiveRepeatSegment> window = new ArrayList();
 
@@ -33,6 +34,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		windowSize = 8;
 		sendBase = 0;
 		seqNum = 0;
+		nextSeqNum = 0;
 		timer= new MyTimer(host.getNetwork().getScheduler(), interval);
 	}
 
@@ -69,7 +71,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		}	
 		// receiver receive a message
 		else {
-			System.out.println(payload.message); // debug
+			System.out.println(payload);
 			Tools.log("receiver : received ack for seqNum=" + payload.seqNum);
 			send(true);
 		}
@@ -84,9 +86,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		}
 		// send the payload
 		else {
-			int n = 0;
-			while (window.size() <= windowSize) {	
-				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(sendBase + n++), false);
+			while (window.size() < windowSize) {	
+				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(sendBase + nextSeqNum++), false);
 				window.add(segment);	
 				host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
 				Tools.log("sender : sent segment from window");
@@ -104,6 +105,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			}
 			window.remove(0);
 			sendBase += 1;
+			nextSeqNum -= 1;
 		}
 	}
 
