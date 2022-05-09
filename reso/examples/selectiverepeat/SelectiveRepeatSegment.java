@@ -6,12 +6,12 @@ public class SelectiveRepeatSegment implements Message {
 	
 	public final int    seqNum;
 	public final String message; 
-	public final int    ACK;
+	public final boolean acked;
 	
-	public SelectiveRepeatSegment(int seqNum, String message, int ACK) {
+	public SelectiveRepeatSegment(int seqNum, String message, boolean acked) {
 		this.seqNum  = seqNum;
         this.message = message;
-		this.ACK     = ACK;
+		this.acked     = acked;
     }
 
 	@Override
@@ -22,8 +22,8 @@ public class SelectiveRepeatSegment implements Message {
 
 	@Override
 	public String toString() {
-		if (ACK==1) {
-			return "Selective Repeat [ACK=" + ACK + "]";
+		if (acked==1) {
+			return "Selective Repeat [ACK=" + acked + "]";
 		}
 		return "Selective Repeat [message=" + message + "]";
 	}

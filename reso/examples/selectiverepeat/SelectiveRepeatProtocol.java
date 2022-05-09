@@ -51,29 +51,29 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			i += segmentSize;
 		}
 		messagesList.add(message.substring(i, message.length()));
-		send(messagesList.get(0), 0);
+		send(messagesList.get(0), false);
 	}
 
 	@Override
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 		System.out.println(payload);
-		if (payload.ACK == 1) {
+		if (payload.acked) {
 			System.out.println(payload);
-			send(messagesList.get(++sendBase), 0);	
+			send(messagesList.get(++sendBase), false);	
 		}	
 		else {
 			System.out.println(payload.message);
-			send("", 1);
+			send("", true);
 		}
 	}
 
-	public void send(String message, int ack) throws Exception {
-		if (ack==1) {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum++, message, ack));
+	public void send(String message, boolean acked) throws Exception {
+		if (acked) {
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum++, message, acked));
 		}
 		else {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", ack));
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", acked));
 		}
 	}
 
