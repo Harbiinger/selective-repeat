@@ -17,7 +17,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 
 	private final IPHost        host;
-	private final int           segmentSize;
+	private final int           segmentSize = 8;
 	private       IPAddress     dst;
 	private       AbstractTimer timer;
 	private       int           windowSize;
@@ -26,9 +26,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private ArrayList<String>   messagesList = new ArrayList();
 
 
-	public SelectiveRepeatProtocol(IPHost host, int segmentSize) {
+	public SelectiveRepeatProtocol(IPHost host) {
 		this.host = host;
-		this.segmentSize = segmentSize;
 		double interval = 5.0;
 		windowSize = 1;
 		sendBase = 0;
@@ -43,7 +42,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 */
 	public void sendMessage(IPAddress dst, String message) throws Exception {
 		this.dst = dst;
-
 		// message is devided in multiple smaller messages
 		int i = 0;
 		while (i+segmentSize < message.length()) {
@@ -56,24 +54,24 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 	@Override
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
+		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
-		System.out.println(payload);
 		if (payload.acked) {
 			System.out.println(payload);
 			send(messagesList.get(++sendBase), false);	
 		}	
 		else {
-			System.out.println(payload.message);
+			System.out.println(payload);
 			send("", true);
 		}
 	}
 
 	public void send(String message, boolean acked) throws Exception {
 		if (acked) {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum++, message, acked));
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", true));
 		}
 		else {
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, "", acked));
+			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, message, false));
 		}
 	}
 
