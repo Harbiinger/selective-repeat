@@ -8,10 +8,16 @@ public class SelectiveRepeatSegment implements Message {
 	public final String  message; 
 	public       boolean acked;
 	
-	public SelectiveRepeatSegment(int seqNum, String message, boolean acked) {
+	public SelectiveRepeatSegment(int seqNum, boolean ack) {
+		this.seqNum = seqNum;
+		acked       = ack;
+		message     = null;
+	}
+
+	public SelectiveRepeatSegment(int seqNum, String message) {
 		this.seqNum  = seqNum;
         this.message = message;
-		this.acked   = acked;
+		acked        = false;
     }
 
 	@Override

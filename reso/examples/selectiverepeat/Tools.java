@@ -8,14 +8,14 @@ import java.io.IOException;
 
 public class Tools {
 	
-	public static void log(String log) {
+	public static void log(String actor, String log) {
 		try {
 			FileWriter myWriter = new FileWriter("selectiverepeat.log", true);
 			BufferedWriter bw = new BufferedWriter(myWriter);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm:ss");
 			LocalDateTime now = LocalDateTime.now();
 			String time = now.format(formatter);
-			bw.write("["+time+"] "+log);
+			bw.write("["+time+"] <"+actor+"> ~> "+log);
 			bw.newLine();
 			bw.close();
 		} catch (IOException e) {
