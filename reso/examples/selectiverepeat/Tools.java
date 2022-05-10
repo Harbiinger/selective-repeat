@@ -1,4 +1,3 @@
-
 package reso.examples.selectiverepeat;
 
 import java.io.FileWriter;
@@ -18,4 +17,5 @@ public class Tools {
 			System.out.println("Could not write log to selectiverepeat.log");
 		}
 	}
+
 }

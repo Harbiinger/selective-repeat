@@ -21,20 +21,21 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       AbstractTimer timer;
 	private       int           windowSize;
 	private       int           sstresh;
-	private		  int 			dupAckNb;
+	private		    int 	     		dupAckNb;
 	private       int           seqBase;    // sequence number of the fist packet in the window
 	private       int           seqNum;     // current sequence number
 	private       int           nextSeqNum; // next sequence number in the window ("cursor")
 
 	private ArrayList<String>                 messagesList = new ArrayList<String>(); // data to be send
 	private ArrayList<SelectiveRepeatSegment> window       = new ArrayList<SelectiveRepeatSegment>(); // sender window
-	private ArrayList<SelectiveRepeatSegment> buffer       = new ArrayList<SelectiveRepeatSegment>(); // buffer for received messages
+	private ArrayList<SelectiveRepeatSegment> buffer       = new ArrayList<SelectiveRepeatSegment>(); // buffer for received messag
 	private String                            data         = "";              // data ready to be delivered to the application layer
 
 
 	public SelectiveRepeatProtocol(IPHost host) {
 		this.host       = host;
 		double interval = 5.0;
+
 		windowSize      = 1;
 		seqBase         = 0;
 		seqNum          = 0;
@@ -66,7 +67,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 		windowSize = payload.windowSize;
-		System.out.println("Window size : "+windowSize);
+		System.out.println("Window size : "+windowSize); // debug
+
 		// sender receives an ack
 		if (payload.acked) {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+"]");
@@ -91,7 +93,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			} else{
 				windowSize++;
 			}
-
+      
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+"]");
 			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
 				sendAck();
@@ -103,10 +105,12 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				windowSize = windowSize/2;
 				dupAckNb = 0; 
 			}
+
 		}
 	}
 
 	public void send() throws Exception {
+
 		while (window.size() <= windowSize) {	
 			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++), windowSize);
 			window.add(segment);	
@@ -177,6 +181,42 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	}
 
 	/*
+	 * Deliver data to the application layer
+	 * in the right order
+	 */
+	private void verifyBuffer() {
+		for (SelectiveRepeatSegment segment : buffer) {
+			if (segment.seqNum == seqBase) {
+				data    += segment.message; // delivering data 
+				seqBase += 1;               // move the receiver window
+				buffer.remove(segment);
+				System.out.println(segment.message); //debug
+			}
+		}
+	}
+
+	// le pire algorithme du 21e siecle 
+	// auteur : francois vion
+	/*
+	 * Add segment to the buffer in order (sorted by seqNum)
+	 */
+	private void addToBuffer(SelectiveRepeatSegment segment) {
+		if (buffer.size() == 0) {
+			buffer.add(segment);
+		} else {
+			int i = 0;
+			for (SelectiveRepeatSegment s : buffer) {
+				if (segment.seqNum < s.seqNum) {
+					buffer.add(i, segment);
+				}
+				i++;
+			}
+		}
+	// >>> by francois vion <<<
+	}
+
+	/*
+
 	 * This method increases the sequence number
 	 * this is not very useful because we don't use cylic sequence numbers
 	 */
@@ -205,5 +245,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
     public void stop() {
     	timer.stop();
     }
+  }
 
 }
