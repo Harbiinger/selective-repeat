@@ -7,18 +7,21 @@ public class SelectiveRepeatSegment implements Message {
 	public final int     seqNum;
 	public final String  message; 
 	public       boolean acked;
+	public final int     windowSize;
 	
-	public SelectiveRepeatSegment(int seqNum, boolean ack) {
+	public SelectiveRepeatSegment(int seqNum, boolean ack, int windowSize) {
 		this.seqNum = seqNum;
 		acked       = ack;
 		message     = null;
+		this.windowSize = windowSize;
 	}
 
-	public SelectiveRepeatSegment(int seqNum, String message) {
+	public SelectiveRepeatSegment(int seqNum, String message, int windowSize) {
 		this.seqNum  = seqNum;
-        this.message = message;
+    this.message = message;
 		acked        = false;
-    }
+		this.windowSize = windowSize;
+  }
 
 	@Override
 	public int getByteLength() {
