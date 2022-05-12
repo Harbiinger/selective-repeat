@@ -59,7 +59,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			i += segmentSize;
 		}
 		messagesList.add(message.substring(i, message.length()));
-		send();
+		pipeliningSend();
 	}
 
 	@Override
@@ -77,24 +77,27 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 					segment.acked = true; // the corresponding segment is marked as acked
 				}	
 			}
-			verifyWindow(); // remove acked segments
-			send();         // try to send new segments
-		}	
 
-		// receiver receives a message
-		else {
 			// If we are in slow start/fast recovery
 			if(windowSize < sstresh){
 				windowSize = windowSize*2;
+
 				// Make sure that the exponential growth don't go past sstresh
 				if(windowSize > sstresh){
 					windowSize = sstresh;
 				}
-			} else{
+			} else {
 				windowSize++;
 			}
-      
+
+			verifyWindow();   // remove acked segments
+			pipeliningSend(); // try to send new segments
+		}	
+
+		// receiver receives a message
+		else {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+
 			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
 				sendAck();
 				addToBuffer(payload); // add segment to the buffer in order
@@ -109,16 +112,25 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		}
 	}
 
-	public void send() throws Exception {
-
+	/*
+	 * Send packets until the window is full
+	 */
+	public void pipeliningSend() throws Exception {
 		while (window.size() <= windowSize) {	
 			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++), windowSize);
-			window.add(segment);	
-			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
-			increaseSeqNum();
+			send(segment);
 		}
 		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "window is full");
+	}
+
+	/*
+	 * Method to send one packet
+	 */
+	public void send(SelectiveRepeatSegment segment) throws Exception {
+		window.add(segment);
+		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
+		increaseSeqNum();
 	}
 
 	/*
