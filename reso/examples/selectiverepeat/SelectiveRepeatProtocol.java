@@ -72,6 +72,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		// sender receives an ack
 		if (payload.acked) {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+
 			for (SelectiveRepeatSegment segment : window) {
 				if (segment.seqNum == payload.seqNum) {
 					segment.acked = true; // the corresponding segment is marked as acked
@@ -116,7 +117,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * Send packets until the window is full
 	 */
 	public void pipeliningSend() throws Exception {
-		while (window.size() <= windowSize) {	
+		while (window.size() < windowSize) {	
 			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++), windowSize);
 			send(segment);
 		}
@@ -147,11 +148,15 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * if they are acked.
 	 */
 	private void verifyWindow() {
-		for (SelectiveRepeatSegment segment : window) {
-			if (!segment.acked) {
+		int size = window.size();
+		int cpt = 0;
+
+		for(int i = 0; i < size; i++){
+			if (!window.get(cpt).acked) {
 				break;
 			}
 			window.remove(0);
+			cpt++;
 			seqBase    += 1;
 			nextSeqNum -= 1;
 		}
