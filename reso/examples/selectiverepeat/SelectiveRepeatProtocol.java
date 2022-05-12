@@ -21,7 +21,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       AbstractTimer timer;
 	private       int           windowSize;
 	private       int           sstresh;
-	private		    int 	     		dupAckNb;
+	private		  int 	        dupAckNb;
 	private       int           seqBase;    // sequence number of the fist packet in the window
 	private       int           seqNum;     // current sequence number
 	private       int           nextSeqNum; // next sequence number in the window ("cursor")
@@ -177,43 +177,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				i++;
 			}
 		}
+	}	
 	// >>> by francois vion <<<
-	}
-
-	/*
-	 * Deliver data to the application layer
-	 * in the right order
-	 */
-	private void verifyBuffer() {
-		for (SelectiveRepeatSegment segment : buffer) {
-			if (segment.seqNum == seqBase) {
-				data    += segment.message; // delivering data 
-				seqBase += 1;               // move the receiver window
-				buffer.remove(segment);
-				System.out.println(segment.message); //debug
-			}
-		}
-	}
-
-	// le pire algorithme du 21e siecle 
-	// auteur : francois vion
-	/*
-	 * Add segment to the buffer in order (sorted by seqNum)
-	 */
-	private void addToBuffer(SelectiveRepeatSegment segment) {
-		if (buffer.size() == 0) {
-			buffer.add(segment);
-		} else {
-			int i = 0;
-			for (SelectiveRepeatSegment s : buffer) {
-				if (segment.seqNum < s.seqNum) {
-					buffer.add(i, segment);
-				}
-				i++;
-			}
-		}
-	// >>> by francois vion <<<
-	}
 
 	/*
 
@@ -245,6 +210,4 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
     public void stop() {
     	timer.stop();
     }
-  }
-
 }
