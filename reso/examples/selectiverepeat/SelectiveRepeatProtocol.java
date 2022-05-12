@@ -152,7 +152,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		int cpt = 0;
 
 		for(int i = 0; i < size; i++){
-			if (!window.get(cpt).acked) {
+			if (!window.get(i-cpt).acked) {
 				break;
 			}
 			window.remove(0);
@@ -167,14 +167,27 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * in the right order
 	 */
 	private void verifyBuffer() {
-		for (SelectiveRepeatSegment segment : buffer) {
-			if (segment.seqNum == seqBase) {
+		int size = buffer.size();
+		int cpt = 0;
+
+		for(int i = 0; i < size; i++){
+			SelectiveRepeatSegment segment = buffer.get(i-cpt);
+			if(segment.seqNum == seqBase){
 				data    += segment.message; // delivering data 
 				seqBase += 1;               // move the receiver window
-				buffer.remove(segment);
-				System.out.println(segment.message); //debug
+				buffer.remove(0);
+				cpt++;
+				System.out.println(segment); //debug
 			}
 		}
+		// for (SelectiveRepeatSegment segment : buffer) {
+		// 	if (segment.seqNum == seqBase) {
+		// 		data    += segment.message; // delivering data 
+		// 		seqBase += 1;               // move the receiver window
+		// 		buffer.remove(segment);
+		// 		System.out.println(segment.message); //debug
+		// 	}
+		// }
 	}
 
 	// le pire algorithme du 21e siecle 
