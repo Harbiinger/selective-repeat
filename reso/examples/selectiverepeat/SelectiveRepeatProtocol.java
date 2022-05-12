@@ -117,9 +117,17 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * Send packets until the window is full
 	 */
 	public void pipeliningSend() throws Exception {
+
 		while (window.size() < windowSize) {	
-			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++), windowSize);
-			send(segment);
+			if(seqNum<messagesList.size()){
+				nextSeqNum++;
+				String message = messagesList.get(seqNum);
+				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, message, windowSize);
+				send(segment);
+			} else{
+				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "message fully sent");
+				break;
+			}
 		}
 		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "window is full");
 	}
