@@ -125,7 +125,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, message, windowSize);
 				send(segment);
 			} else{
-				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "message fully sent");
 				break;
 			}
 		}
