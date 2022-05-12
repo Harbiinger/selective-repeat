@@ -71,7 +71,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// sender receives an ack
 		if (payload.acked) {
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 			for (SelectiveRepeatSegment segment : window) {
 				if (segment.seqNum == payload.seqNum) {
 					segment.acked = true; // the corresponding segment is marked as acked
@@ -94,7 +94,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				windowSize++;
 			}
       
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
 				sendAck();
 				addToBuffer(payload); // add segment to the buffer in order
@@ -115,7 +115,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, messagesList.get(seqBase + nextSeqNum++), windowSize);
 			window.add(segment);	
 			host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
 			increaseSeqNum();
 		}
 		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "window is full");
@@ -126,7 +126,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 */
 	public void sendAck() throws Exception {
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, true, windowSize));
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "sent ack [seqNum="+seqNum+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "sent ack [seqNum="+seqNum+", windowSize="+windowSize+"]");
 		increaseSeqNum();
 	}
 
