@@ -35,7 +35,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 	public SelectiveRepeatProtocol(IPHost host) {
 		this.host       = host;
-		double interval = 5.0;
+		double interval = 1.0;
 		windowSize      = 1;
 		seqBase         = 0;
 		seqNum          = 0;
@@ -67,60 +67,63 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 		windowSize = payload.windowSize;
 
-		// sender receives an ack
-		if (payload.acked) {
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+		// simulating packet loss (10%) 
+		Random rand = new Random();
+		if (rand.nextInt(3) == 1) {
+			System.out.println(payload.seqNum + " lost"); // debug
+		} else{
+			// sender receives an ack
+			if (payload.acked) {
+				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 
-			for (SelectiveRepeatSegment segment : window) {
-				if (segment.seqNum == payload.seqNum) {
-					segment.acked = true; // the corresponding segment is marked as acked
-					stop(payload.seqNum);        // stop the timer
-				}	
-			}
-
-			// If we are in slow start/fast recovery
-			if(windowSize < sstresh){
-				windowSize = windowSize*2;
-
-				// Make sure that the exponential growth don't go past sstresh
-				if(windowSize > sstresh){
-					windowSize = sstresh;
+				for (SelectiveRepeatSegment segment : window) {
+					if (segment.seqNum == payload.seqNum) {
+						segment.acked = true; // the corresponding segment is marked as acked
+						stop(payload.seqNum);        // stop the timer
+					}	
 				}
-			} else {
-				windowSize++;
-			}
 
-			verifyWindow();   // remove acked segments
-			pipeliningSend(); // try to send new segments
-		}	
 
-		// receiver receives a message
-		else {
 
-			// simulating packet loss (10%) 
-			Random rand = new Random();
-			if (rand.nextInt(10) == 1) {
-				System.out.println(payload.seqNum + "lost"); // debug
-				return;
-			}
+				if(verifyWindow()){ // remove acked segments
 
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+					// If we are in slow start/fast recovery
+					if(windowSize < sstresh){
+						windowSize = windowSize*2;
 
-			if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
-				sendAck(payload.seqNum);
-				addToBuffer(payload); // add segment to the buffer in order
-				verifyBuffer();       // deliver data in order
+						// Make sure that the exponential growth don't go past sstresh
+						if(windowSize > sstresh){
+							windowSize = sstresh;
+						}
+					} else {
+						windowSize++;
+					}
 
-				if (payload.seqNum == 92) {
-					System.out.println(data); // debug
+				}   
+
+				pipeliningSend(); // try to send new segments
+			}	
+
+			// receiver receives a message
+			else {
+
+				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+
+				// if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
+
+				// if (payload.seqNum < seqBase+windowSize) {
+					sendAck(payload.seqNum);
+					addToBuffer(payload); // add segment to the buffer in order
+					verifyBuffer();       // deliver data in order
+				// }
+
+				if(dupAckNb == 3){
+					windowSize = windowSize/2;
+					dupAckNb = 0; 
 				}
-			}
-
-			if(dupAckNb == 3){
-				windowSize = windowSize/2;
-				dupAckNb = 0; 
 			}
 		}
+
 	}
 
 	/*
@@ -171,7 +174,8 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * This method removes the x first segments from the sender window
 	 * if they are acked.
 	 */
-	private void verifyWindow() {
+	private boolean verifyWindow() {
+		boolean forwarded = false;
 		int size = window.size();
 		int cpt = 0;
 
@@ -183,7 +187,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			cpt++;
 			seqBase    += 1;
 			nextSeqNum -= 1;
+			forwarded = true;
 		}
+		return forwarded;
 	}
 
 	/*
@@ -203,14 +209,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				cpt++;
 			}
 		}
-		// for (SelectiveRepeatSegment segment : buffer) {
-		// 	if (segment.seqNum == seqBase) {
-		// 		data    += segment.message; // delivering data 
-		// 		seqBase += 1;               // move the receiver window
-		// 		buffer.remove(segment);
-		// 		System.out.println(segment.message); //debug
-		// 	}
-		// }
 	}
 
 	/*
@@ -256,7 +254,11 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			reSend(segment); // retransmission of the segment 
 
 			// Set the sstresh to the half of windows size and reset the window size to 1
-			sstresh = windowSize/2;
+			if(windowSize == 1){
+				sstresh = 1;
+			} else{
+				sstresh = windowSize/2;
+			}
 			windowSize = 1;
 		}
 

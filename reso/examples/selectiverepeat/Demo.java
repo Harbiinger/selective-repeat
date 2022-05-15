@@ -39,7 +39,7 @@ public class Demo {
 
 
     		// Connect both interfaces with a 5000km long link
-    		new Link<EthernetFrame>(h1_eth0, h2_eth0, 10000000, 100000);
+    		new Link<EthernetFrame>(h1_eth0, h2_eth0, 5000, 100000);
 
     		host1.start();
     		host2.start();
