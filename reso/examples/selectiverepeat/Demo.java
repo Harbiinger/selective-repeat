@@ -13,6 +13,8 @@ public class Demo {
     public static String data = "Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It’s not a story the Jedi would tell you. It’s a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself."; 
 	
 	public static void main(String[] args) {
+        int packetLoss = Integer.parseInt(args[0]);
+
 		AbstractScheduler scheduler= new Scheduler();
 		Network network= new Network(scheduler);
     	try {
@@ -25,11 +27,11 @@ public class Demo {
     		host1.getIPLayer().addRoute(IP_ADDR2, "eth0");
     		
 			//host1.addApplication(new AppSniffer(host1, new String [] {"eth0"}));
-    		host1.addApplication(new AppSender(host1, IP_ADDR2, data));
+    		host1.addApplication(new AppSender(host1, IP_ADDR2, data, packetLoss));
 
     		IPHost host2= NetworkBuilder.createHost(network,"H2", IP_ADDR2, MAC_ADDR2);
     		host2.getIPLayer().addRoute(IP_ADDR1, "eth0");
-    		host2.addApplication(new AppReceiver(host2));
+    		host2.addApplication(new AppReceiver(host2, packetLoss));
 
     		EthernetInterface h1_eth0= (EthernetInterface) host1.getInterfaceByName("eth0");
     		EthernetInterface h2_eth0= (EthernetInterface) host2.getInterfaceByName("eth0");
@@ -39,7 +41,7 @@ public class Demo {
 
 
     		// Connect both interfaces with a 5000km long link
-    		new Link<EthernetFrame>(h1_eth0, h2_eth0, 10000000, 100000);
+    		new Link<EthernetFrame>(h1_eth0, h2_eth0, 5000, 100000);
 
     		host1.start();
     		host2.start();
