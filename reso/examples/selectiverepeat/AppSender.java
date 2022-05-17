@@ -10,16 +10,18 @@ public class AppSender extends AbstractApplication {
 	private final IPLayer   ip;
 	private final IPAddress dst;
 	private final String    message;
+	private final int       packetLoss;
 
-	public AppSender(IPHost host, IPAddress dst, String message) {
+	public AppSender(IPHost host, IPAddress dst, String message, int packetLoss) {
 		super(host, "sender");
-		this.dst     = dst;
-		this.message = message;
-		ip           = host.getIPLayer();
+		this.dst        = dst;
+		this.message    = message;
+		this.packetLoss = packetLoss;
+		ip              = host.getIPLayer();
 	}
 
 	public void start() throws Exception {
-		SelectiveRepeatProtocol protocol = new SelectiveRepeatProtocol((IPHost) host);
+		SelectiveRepeatProtocol protocol = new SelectiveRepeatProtocol((IPHost) host, packetLoss);
     	ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, protocol);
 		protocol.sendMessage(dst, message);
 	}

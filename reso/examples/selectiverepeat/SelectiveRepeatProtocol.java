@@ -17,6 +17,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public static final int IP_PROTO_SELECTIVE_REPEAT= Datagram.allocateProtocolNumber("SELECTIVE_REPEAT");
 
 	private final int       segmentSize = 8;
+	private final int       packetLoss; // pourcentage of losing a packet
 	private final IPHost    host;
 	private       IPAddress dst;
 	private       int       windowSize;
@@ -32,8 +33,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private ArrayList<MyTimer>                timersList   = new ArrayList<MyTimer>(); 
 	private String                            data         = "";                                      // data ready to be delivered to the application layer
 
-	public SelectiveRepeatProtocol(IPHost host) {
+	public SelectiveRepeatProtocol(IPHost host, int packetLoss) {
 		this.host       = host;
+		this.packetLoss = packetLoss;
 		double interval = 1.0;
 		windowSize      = 1;
 		seqBase         = 0;
@@ -65,9 +67,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
 
-		// simulating packet loss (20%) 
+		// simulating packet loss (packetLoss %) 
 		Random rand = new Random();
-		if (rand.nextInt(5) == 1) {
+		if (rand.nextInt(100) < packetLoss) {
 			System.out.println(payload.seqNum + " lost"); // debug
 		} 
 		else {

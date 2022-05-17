@@ -1,2 +1,2 @@
 #!/bin/bash
-clear && ./clean && javac reso/examples/selectiverepeat/Demo.java && java reso.examples.selectiverepeat.Demo && ./clean 
+clear && ./clean && javac reso/examples/selectiverepeat/Demo.java && java reso.examples.selectiverepeat.Demo 20 && ./clean 
