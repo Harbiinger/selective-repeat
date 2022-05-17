@@ -68,7 +68,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 		// simulating packet loss (10%) 
 		Random rand = new Random();
-		if (rand.nextInt(10) == 1) {
+		if (rand.nextInt(5) == 1) {
 			System.out.println(payload.seqNum + " lost"); // debug
 		} else{
 			// sender receives an ack
@@ -113,11 +113,12 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				if(payload.seqNum == 91){
 					System.out.println(data);
 				}
-				// if (payload.seqNum < seqBase+windowSize) {
-					sendAck(payload.seqNum);
+
+				sendAck(payload.seqNum);
+				if (payload.seqNum < seqBase+windowSize) {
 					addToBuffer(payload); // add segment to the buffer in order
 					verifyBuffer();       // deliver data in order
-				// }
+				}
 
 
 
@@ -224,12 +225,15 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		if (buffer.size() == 0) {
 			buffer.add(segment);
 		} else {
-			int i = 0;
-			for (SelectiveRepeatSegment s : buffer) {
-				if (segment.seqNum < s.seqNum) {
-					buffer.add(i, segment);
+			if(buffer.get(buffer.size()-1).seqNum < segment.seqNum){
+				buffer.add(segment);
+			} else{
+				int size = buffer.size();
+				for(int i = 0; i<size+1; i++){
+					if (buffer.get(i).seqNum > segment.seqNum ) {
+						buffer.add(i, segment);
+					}
 				}
-				i++;
 			}
 		}
 	}	
