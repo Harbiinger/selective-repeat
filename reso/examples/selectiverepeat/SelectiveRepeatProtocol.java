@@ -65,15 +65,15 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public void receive(IPInterfaceAdapter src, Datagram datagram) throws Exception {
 		dst = datagram.src;
 		SelectiveRepeatSegment payload = (SelectiveRepeatSegment) datagram.getPayload();
-		windowSize = payload.windowSize;
 
 		// simulating packet loss (10%) 
 		Random rand = new Random();
-		if (rand.nextInt(3) == 1) {
+		if (rand.nextInt(10) == 1) {
 			System.out.println(payload.seqNum + " lost"); // debug
 		} else{
 			// sender receives an ack
 			if (payload.acked) {
+
 				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 
 				for (SelectiveRepeatSegment segment : window) {
@@ -82,7 +82,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 						stop(payload.seqNum);        // stop the timer
 					}	
 				}
-
 
 
 				if(verifyWindow()){ // remove acked segments
@@ -106,16 +105,21 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 
 			// receiver receives a message
 			else {
+				windowSize = payload.windowSize;
 
 				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 
 				// if (payload.seqNum >= seqBase && payload.seqNum < seqBase+windowSize) {
-
+				if(payload.seqNum == 91){
+					System.out.println(data);
+				}
 				// if (payload.seqNum < seqBase+windowSize) {
 					sendAck(payload.seqNum);
 					addToBuffer(payload); // add segment to the buffer in order
 					verifyBuffer();       // deliver data in order
 				// }
+
+
 
 				if(dupAckNb == 3){
 					windowSize = windowSize/2;
@@ -151,6 +155,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		window.add(segment);
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
 		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
+		Tools.plot(host.getNetwork().getScheduler().getCurrentTime()*1000, windowSize);
 		increaseSeqNum();
 		start(segment); // start a timer
 	}
@@ -160,6 +165,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
 		start(segment); // start a new timer
 		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "resent segment [seqNum="+segment.seqNum+", windowSize="+windowSize+"]");
+		Tools.plot(host.getNetwork().getScheduler().getCurrentTime()*1000, windowSize);
 	}	
 
 	/*
