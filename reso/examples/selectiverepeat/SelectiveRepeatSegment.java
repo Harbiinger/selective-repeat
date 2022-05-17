@@ -32,9 +32,9 @@ public class SelectiveRepeatSegment implements Message {
 	@Override
 	public String toString() {
 		if (acked) {
-			return "Selective Repeat [ACK=" + acked + "]";
+			return "Selective Repeat [seqNum="+seqNum+", ack=1]";
 		}
-		return "Selective Repeat [message=" + message + "]";
+		return "Selective Repeat [seqNum="+seqNum+", message="+message+"]";
 	}
 
 }
