@@ -77,4 +77,28 @@
 
 \pagenumbering{arabic}
 
+\section{Applications}
+
+Nous avons décidé de suivre l'exemple ping-pong et de créer deux classes application, une qui envoie les données et une autre qui les reçcoit.
+L'app sender recoit les données à envoyer en paramètre de son constructeur et passe ensuite ces données à la méthode sendMessage du protocol. 
+Tandis que l'app receiver, au lancement de l'application, ne fait qu'écouter.
+
+\section{Selective-repeat}
+
+\subsection{Envoi d'un message}
+
+Un message peut être envoyé par une application via la méthode sendMessage de notre prtocol. Cette méthode va séparer ce message en plus petits messages de 8 caractères qui vont pouvoir ensuite être envoyés en pipelining.
+
+\subsection{Pipelining}
+
+La méthode pipeliningSend s'occupe d'envoyer des segments tant que la window n'a pas atteint sa taille maximale.
+
+\subsection{Envoi d'un segment}
+
+Afin d'envoyer un segment, la méthode send envoie ce segment à la destination, l'ajoute à l'arrayList représentant la window et finalement crée et démarre un timer afin de gérer les timeout pour ce segment.
+
+\subsection{Timeout}
+
+Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé.
+
 \end{document}
