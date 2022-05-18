@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage{float}
+\usepackage{svg}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{changepage}
+\hypersetup{
+	colorlinks,
+	citecolor=black,
+	filecolor=black,
+	linkcolor=black,
+	urlcolor=black
+}
+%\graphicspath{ressources/}
+
+\usepackage{blindtext}
+
+\usepackage{subfiles} % Best loaded last in the preamble
+
+\title{Titre}
+\author{ }
+\date{ }
+
+\begin{document}
+\begin{titlepage}
+	\begin{center}
+
+		{\Large Université de Mons}\\[1ex]
+		{\Large Faculté Des Sciences}\\[1ex]
+		{\Large Département d'Informatique}\\[1ex]
+
+		\newcommand{\HRule}{\rule{\linewidth}{0.3mm}}
+		% Title
+		\HRule \\[0.3cm]
+		{ \LARGE \bfseries Projet réseau - Selective-repeat \\[0.3cm]}
+		%{ \LARGE \bfseries Rapport d'implémentation  \\[0.1cm]} % Commenter si pas besoin
+		\HRule \\[1.5cm]
+
+		% Author and supervisor
+		\begin{minipage}[t]{0.45\textwidth}
+			\begin{flushleft} \large
+				\emph{Professeur:}\\
+				Bruno \textsc{Quoitin}\\
+				\emph{Assistants:}\\
+				Jeremy \textsc{Dubrulle}\\
+			\end{flushleft}
+		\end{minipage}
+		\begin{minipage}[t]{0.45\textwidth}
+			\begin{flushright} \large
+				\emph{Auteurs:} \\
+				Théo \textsc{Godin} \\
+				François \textsc{Vion} \\
+			\end{flushright}
+		\end{minipage}\\[2ex]
+
+		\vfill
+
+		% Bottom of the page
+		\begin{center}
+			\begin{tabular}[t]{c c c}
+				\includegraphics[height=1.5cm]{ressources/logoumons.jpg} &
+				\includegraphics[height=1.5cm]{ressources/logofs.jpg} &
+			\end{tabular}
+		\end{center}~\\
+
+		{\large Année académique 2021-2022}
+
+	\end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+
+\end{document}
