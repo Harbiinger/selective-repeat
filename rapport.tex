@@ -87,7 +87,7 @@ Tandis que l'app receiver, au lancement de l'application, ne fait qu'écouter.
 
 \subsection{Envoi d'un message}
 
-Un message peut être envoyé par une application via la méthode sendMessage de notre prtocol. Cette méthode va séparer ce message en plus petits messages de 8 caractères qui vont pouvoir ensuite être envoyés en pipelining.
+Un message peut être envoyé par une application via la méthode sendMessage de notre protocol. Cette méthode va séparer ce message en plus petits messages de 8 caractères qui vont pouvoir ensuite être envoyés en pipelining.
 
 \subsection{Pipelining}
 
@@ -97,8 +97,17 @@ La méthode pipeliningSend s'occupe d'envoyer des segments tant que la window n'
 
 Afin d'envoyer un segment, la méthode send envoie ce segment à la destination, l'ajoute à l'arrayList représentant la window et finalement crée et démarre un timer afin de gérer les timeout pour ce segment.
 
-\subsection{Timeout}
+\subsection{Timeout et RTO}
 
-Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé.
+Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé. La durée du timer est calculée de la même manière que vue au cours.
+Si l'on a un timeout, la durée de celui ci est doublé et si le receveur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
+
+\subsection{Contrôle de congestion}
+
+Afin de gérer le contrôle de congestion, la taille de la fenêtre est modifié au cours du processus afin d'avoir une taille optimale tout au long de l'envoi.
+Cela se fait lorsque l'envoyeur reçoit un ACK ou lors d'un timeout.
+Lors de la réception d'un ACK, on double la taille de la fenêtre si celle-ci est inférieure au sstresh (fixé à 100 au départ). Si elle est inférieure, on l'incrémente de 1.
+Lors d'un timeout, la taille de fenêtre est fixée à 1 et le sstresh est fixé à la moitié de la dernière valeur de fenêtre. Dans le cas où la fenêtre avait une taille de 1, le sstresh est fixé à 1.
+
 
 \end{document}
