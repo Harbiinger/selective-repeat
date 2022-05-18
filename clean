@@ -1,5 +1,0 @@
-#!/bin/bash
-if [ -f "reso/examples/selectiverepeat/Demo.class" ];
-then
-rm reso/examples/selectiverepeat/*.class #&& echo ".class files deleted"
-fi
