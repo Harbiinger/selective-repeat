@@ -115,7 +115,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 						}
 					}
 					if(R == -1.0){ // First ACK
-						R = host.getNetwork().getScheduler().getCurrentTime();
+						// R = host.getNetwork().getScheduler().getCurrentTime();
 						timeSpent = R;
 						SRTT = R;
 						devRTT = R/2;
@@ -189,7 +189,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		stop(segment.seqNum); // stop previous timer
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
 		start(segment);       // start a new timer
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "resent segment [seqNum="+segment.seqNum+", windowSize="+windowSize+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "resent segment [seqNum="+segment.seqNum+", windowSize="+segment.windowSize+"]");
 		Tools.plot(host.getNetwork().getScheduler().getCurrentTime()*1000, windowSize, RTO);
 	}	
 
@@ -240,9 +240,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				cpt++;
 
 				// debug
-				if(segment.seqNum == 92){
+				// if(segment.seqNum == 90){
 					System.out.println(data);
-				}
+				// }
 			}
 		}
 	}
@@ -288,18 +288,24 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	}
 
 	private void calculateRTO(){
-		SRTT = (1.0 - 0.125)*SRTT+ 0.125* R;
-		devRTT = (1.0 - 0.25)*devRTT+ 0.25*(Math.abs(SRTT-R));
-		RTO = SRTT + 4* devRTT;
+		SRTT = ((1.0 - 0.125)*SRTT)+ (0.125* R);
+		devRTT = ((1.0 - 0.25)*devRTT)+ (0.25*(Math.abs(SRTT-R)));
+		RTO = SRTT + 4*devRTT;
 	}
 
     private class MyTimer extends AbstractTimer {
 		private SelectiveRepeatSegment segment;
 
+		private double startTime = host.getNetwork().getScheduler().getCurrentTime();
+
     	public MyTimer(AbstractScheduler scheduler, double interval, SelectiveRepeatSegment segment) {
     		super(scheduler, interval, false);
 			this.segment = segment;
     	}
+
+		private double getStartTime(){
+			return startTime;
+		}
 
 		private int getSeqNum() {
 			return this.segment.seqNum;
@@ -308,7 +314,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
     	protected void run() throws Exception {
 			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "time out [SeqNum="+segment.seqNum+"]");
 			RTO = RTO *2;
-			reSend(this.segment); // retransmission of the segment 
 
 			// Set the sstresh to the half of windows size and reset the window size to 1
 			if(windowSize == 1){
@@ -317,6 +322,12 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				sstresh = windowSize/2;
 			}
 			windowSize = 1;
+
+			this.segment.windowSize = 1;
+
+			reSend(this.segment); // retransmission of the segment 
+
+
 		}
 
 		@Override
@@ -335,6 +346,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		for (MyTimer timer : timersList) {
 			if (timer.getSeqNum() == seqNum) {
 				timer.stop();
+				R = host.getNetwork().getScheduler().getCurrentTime() - timer.getStartTime();
 				timersList.remove(timer);
 				return;
 			}

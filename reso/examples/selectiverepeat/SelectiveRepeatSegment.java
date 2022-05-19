@@ -7,7 +7,7 @@ public class SelectiveRepeatSegment implements Message {
 	public final int     seqNum;
 	public final String  message; 
 	public       boolean acked;
-	public final int     windowSize;
+	public       int     windowSize;
 	
 	public SelectiveRepeatSegment(int seqNum, boolean ack, int windowSize) {
 		this.seqNum     = seqNum;
