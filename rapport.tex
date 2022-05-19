@@ -102,7 +102,7 @@ Afin d'envoyer un segment, la méthode send envoie ce segment à la destination,
 Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé. La durée du timer est calculée de la même manière que vue au cours.
 Si l'on a un timeout, la durée de celui ci est doublé et si le receveur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
 
-\subsection{Contrôle de congestion}
+\section{Contrôle de congestion}
 
 Afin de gérer le contrôle de congestion, la taille de la fenêtre est modifié au cours du processus afin d'avoir une taille optimale tout au long de l'envoi.
 Cela se fait lorsque l'envoyeur reçoit un ACK ou lors d'un timeout.
