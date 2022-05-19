@@ -112,7 +112,7 @@ La méthode pipeliningSend s'occupe d'envoyer des segments tant que la window n'
 \subsection{Envoi d'un segment}
 
 Afin d'envoyer un segment, la méthode send envoie ce segment à la destination, l'ajoute à l'arrayList représentant la window et finalement crée et démarre un timer afin de gérer les timeout pour ce segment.\\
-Du côté du receveur, la méthode sendAck permet d'envoyer un ack de même sequence number que le segment reçu.
+Du côté du receveur, la méthode sendAck permet d'envoyer un acquittement de même sequence number que le segment reçu.
 
 \subsection{Timeout et RTO}
 
@@ -120,10 +120,10 @@ Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau 
 La durée du timer est calculée de la même manière que vue au cours.
 Si l'on a un timeout, la durée de celui ci est doublé et si le receveur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
 
-\subsection{Réception d'un ack}
+\subsection{Réception d'un acquittement}
 
-Lors de la réception d'un ack par l'envoyeur, si le segment correspondant est présent dans la window, celui-ci est marqué comme acked.
-Ainsi, au prochain appel de la méhtode verifyWindow, la fenêtre sera avancée pour chaque paquets ayant reçu sont ack. 
+Lors de la réception d'un acquittement par l'envoyeur, si le segment correspondant est présent dans la window, celui-ci est marqué comme acquitté.
+Ainsi, au prochain appel de la méhtode verifyWindow, la fenêtre sera avancée pour chaque paquets ayant reçu sont acquittement. 
 
 \section{Contrôle de congestion}
 
@@ -134,8 +134,21 @@ Lors d'un timeout, la taille de fenêtre est fixée à 1 et le sstresh est fixé
 
 \section{Bugs rencontrés}
 
-Nous avons remarqués grâce aux logs que le receveur recevait des paquets ackés. 
-Après avoir testé chaque méthode envoyant des messages, la source du bug n'a toujours pas été découverte car aucune d'entre elles n'envoie de message acké. 
+Nous avons remarqués grâce aux logs que le receveur recevait des paquets acquittés. 
+Après avoir testé chaque méthode envoyant des messages, la source du bug n'a toujours pas été découverte car aucune d'entre elles n'envoie de message acquitté. 
 Ce bug a donc été contourné en ajoutant au protocol l'attribut actor permettant de savoir si l'application courrante est l'envoyeur ou le receveur, ce qui est testé lors de la réception d'un message.
+
+\section{Outils}
+
+Notre projet comporte un système de logs implémenté dans la classe Tools.
+La méthode log nécessite 3 paramètres : 
+\begin{enumerate}
+\item le temps
+\item l'acteur
+\item l'action
+\end{enumerate}
+Ces 3 informations sont ensuite enregistrées dans le fichier selectiverepeat.log à la racine du projet.\\
+Nous avons également implémenté la méthode plot afin de suivre l'évolution de la fenêtre.
+Cette méthode permet de générer un fichier csv contenant les données de l'évolution de la fenêtre en fonction du temps. 
 
 \end{document}
