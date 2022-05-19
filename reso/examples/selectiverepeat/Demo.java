@@ -14,7 +14,7 @@ public class Demo {
 	
 	public static void main(String[] args) {
         // int packetLoss = Integer.parseInt(args[0]);
-		int packetLoss = 5;
+		int packetLoss = 20;
 
 		AbstractScheduler scheduler= new Scheduler();
 		Network network= new Network(scheduler);
