@@ -25,8 +25,8 @@ public class SelectiveRepeatSegment implements Message {
 
 	@Override
 	public int getByteLength() {
-		// TODO: do
-		return 3;
+		TODO : do
+		return 8;
 	}
 
 	@Override
