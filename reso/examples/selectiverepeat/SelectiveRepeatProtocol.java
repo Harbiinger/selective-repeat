@@ -41,9 +41,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public SelectiveRepeatProtocol(IPHost host, int packetLoss) {
 		this.host       = host;
 		this.packetLoss = packetLoss;
-		RTO = 3.0;
-		R = -1.0;
-		timeSpent = 0;
+		RTO             = 3.0;
+		R               = -1.0;
+		timeSpent       = 0;
 		windowSize      = 1;
 		seqBase         = 0;
 		seqNum          = 0;
@@ -84,7 +84,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			// sender receives an ack
 			if (payload.acked) {
 				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
-				
 
 				for (SelectiveRepeatSegment segment : window) {
 					if (segment.seqNum == payload.seqNum) {
@@ -144,7 +143,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 * Send packets until the window is full
 	 */
 	public void pipeliningSend() throws Exception {
-
 		while (window.size() < windowSize) {	
 			if(seqNum<messagesList.size()){
 				nextSeqNum++;

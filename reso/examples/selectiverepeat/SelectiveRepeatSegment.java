@@ -10,16 +10,16 @@ public class SelectiveRepeatSegment implements Message {
 	public final int     windowSize;
 	
 	public SelectiveRepeatSegment(int seqNum, boolean ack, int windowSize) {
-		this.seqNum = seqNum;
-		acked       = ack;
-		message     = null;
+		this.seqNum     = seqNum;
+		acked           = ack;
+		message         = null;
 		this.windowSize = windowSize;
 	}
 
 	public SelectiveRepeatSegment(int seqNum, String message, int windowSize) {
-		this.seqNum  = seqNum;
-    this.message = message;
-		acked        = false;
+		this.seqNum     = seqNum;
+    	this.message    = message;
+		acked           = false;
 		this.windowSize = windowSize;
   }
 
