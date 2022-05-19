@@ -52,8 +52,10 @@
 		\begin{minipage}[t]{0.45\textwidth}
 			\begin{flushright} \large
 				\emph{Auteurs:} \\
-				Théo \textsc{Godin} \\
-				François \textsc{Vion} \\
+				Théo \textsc{Godin} 210170 \\
+				François \textsc{Vion} 210809 \\
+				\emph{Groupe:} \\
+				23
 			\end{flushright}
 		\end{minipage}\\[2ex]
 
@@ -77,6 +79,19 @@
 
 \pagenumbering{arabic}
 
+\section{Construction et exécution}
+
+La compilation du projet se fait en exécutant la commande :
+\begin{verbatim}
+$ javac reso/examples/selectiverepeat/Demo.java
+\end{verbatim}
+Et l'exécution : 
+\begin{verbatim}
+$ java reso.examples.selectiverepeat.Demo x
+\end{verbatim}
+(où x est le pourcentage de paquets perdus).\\
+Une fois l'exécution terminée les fichiers log et csv sont générés à la racine du projet.
+
 \section{Applications}
 
 Nous avons décidé de suivre l'exemple ping-pong et de créer deux classes application, une qui envoie les données et une autre qui les reçcoit.
@@ -87,7 +102,8 @@ Tandis que l'app receiver, au lancement de l'application, ne fait qu'écouter.
 
 \subsection{Envoi d'un message}
 
-Un message peut être envoyé par une application via la méthode sendMessage de notre protocol. Cette méthode va séparer ce message en plus petits messages de 8 caractères qui vont pouvoir ensuite être envoyés en pipelining.
+Un message peut être envoyé par une application via la méthode sendMessage de notre protocol. 
+Cette méthode va séparer ce message en plus petits messages de 8 caractères qui vont pouvoir ensuite être envoyés en pipelining.
 
 \subsection{Pipelining}
 
@@ -95,12 +111,19 @@ La méthode pipeliningSend s'occupe d'envoyer des segments tant que la window n'
 
 \subsection{Envoi d'un segment}
 
-Afin d'envoyer un segment, la méthode send envoie ce segment à la destination, l'ajoute à l'arrayList représentant la window et finalement crée et démarre un timer afin de gérer les timeout pour ce segment.
+Afin d'envoyer un segment, la méthode send envoie ce segment à la destination, l'ajoute à l'arrayList représentant la window et finalement crée et démarre un timer afin de gérer les timeout pour ce segment.\\
+Du côté du receveur, la méthode sendAck permet d'envoyer un ack de même sequence number que le segment reçu.
 
 \subsection{Timeout et RTO}
 
-Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé. La durée du timer est calculée de la même manière que vue au cours.
+Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé. 
+La durée du timer est calculée de la même manière que vue au cours.
 Si l'on a un timeout, la durée de celui ci est doublé et si le receveur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
+
+\subsection{Réception d'un ack}
+
+Lors de la réception d'un ack par l'envoyeur, si le segment correspondant est présent dans la window, celui-ci est marqué comme acked.
+Ainsi, au prochain appel de la méhtode verifyWindow, la fenêtre sera avancée pour chaque paquets ayant reçu sont ack. 
 
 \section{Contrôle de congestion}
 
@@ -109,5 +132,10 @@ Cela se fait lorsque l'envoyeur reçoit un ACK ou lors d'un timeout.
 Lors de la réception d'un ACK, on double la taille de la fenêtre si celle-ci est inférieure au sstresh (fixé à 100 au départ). Si elle est inférieure, on l'incrémente de 1.
 Lors d'un timeout, la taille de fenêtre est fixée à 1 et le sstresh est fixé à la moitié de la dernière valeur de fenêtre. Dans le cas où la fenêtre avait une taille de 1, le sstresh est fixé à 1.
 
+\section{Bugs rencontrés}
+
+Nous avons remarqués grâce aux logs que le receveur recevait des paquets ackés. 
+Après avoir testé chaque méthode envoyant des messages, la source du bug n'a toujours pas été découverte car aucune d'entre elles n'envoie de message acké. 
+Ce bug a donc été contourné en ajoutant au protocol l'attribut actor permettant de savoir si l'application courrante est l'envoyeur ou le receveur, ce qui est testé lors de la réception d'un message.
 
 \end{document}
