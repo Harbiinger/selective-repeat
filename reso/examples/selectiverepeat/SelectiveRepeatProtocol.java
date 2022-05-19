@@ -19,6 +19,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private final int       segmentSize = 8;
 	private final int       packetLoss; // pourcentage of losing a packet
 	private final IPHost    host;
+	private final String    actor;
 	private       IPAddress dst;
 	private       int       windowSize;
 	private       int       sstresh;
@@ -38,9 +39,10 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private ArrayList<MyTimer>                timersList   = new ArrayList<MyTimer>(); 
 	private String                            data         = "";                                      // data ready to be delivered to the application layer
 
-	public SelectiveRepeatProtocol(IPHost host, int packetLoss) {
+	public SelectiveRepeatProtocol(IPHost host, String actor, int packetLoss) {
 		this.host       = host;
 		this.packetLoss = packetLoss;
+		this.actor      = actor;
 		RTO             = 3.0;
 		R               = -1.0;
 		timeSpent       = 0;
@@ -77,13 +79,13 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		// simulating packet loss (packetLoss %) 
 		Random rand = new Random();
 		if (rand.nextInt(100) < packetLoss) {
-			System.out.println(payload.seqNum + " lost"); // debug
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "packet lost", "[seqNum="+payload.seqNum+"]");
 		} 
 		else {
 
 			// sender receives an ack
-			if (payload.acked) {
-				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+			if (actor.equals("bob") && payload.acked) {
+				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "received ack [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 
 				for (SelectiveRepeatSegment segment : window) {
 					if (segment.seqNum == payload.seqNum) {
@@ -122,9 +124,9 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			}	
 
 			// receiver receives a message
-			else {
+			else if (actor.equals("alice") && !payload.acked) {
 				windowSize = payload.windowSize;
-				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
+				Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "received message [seqNum="+payload.seqNum+", windowSize="+windowSize+"]");
 				sendAck(payload.seqNum);
 
 				if (payload.seqNum < seqBase+windowSize) {
@@ -153,7 +155,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				break;
 			}
 		}
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "window is full");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "window is full");
 	}
 
 	/*
@@ -162,7 +164,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public void send(SelectiveRepeatSegment segment) throws Exception {
 		window.add(segment);
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "sent segment [seqNum="+seqNum+", windowSize="+windowSize+"]");
 		Tools.plot(host.getNetwork().getScheduler().getCurrentTime()*1000, windowSize);
 		increaseSeqNum();
 		start(segment); // start a timer
@@ -172,7 +174,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		stop(segment.seqNum); // stop previous timer
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, segment);
 		start(segment);       // start a new timer
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "resent segment [seqNum="+segment.seqNum+", windowSize="+windowSize+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "resent segment [seqNum="+segment.seqNum+", windowSize="+windowSize+"]");
 		Tools.plot(host.getNetwork().getScheduler().getCurrentTime()*1000, windowSize);
 	}	
 
@@ -181,7 +183,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	 */
 	public void sendAck(int seqNum) throws Exception {
 		host.getIPLayer().send(IPAddress.ANY, dst, IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatSegment(seqNum, true, windowSize));
-		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "receiver", "sent ack [seqNum="+seqNum+", windowSize="+windowSize+"]");
+		Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "sent ack [seqNum="+seqNum+", windowSize="+windowSize+"]");
 	}
 
 	/*
@@ -289,7 +291,7 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		}
 
     	protected void run() throws Exception {
-			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, "sender", "time out [SeqNum="+segment.seqNum+"]");
+			Tools.log(host.getNetwork().getScheduler().getCurrentTime()*1000, actor, "time out [SeqNum="+segment.seqNum+"]");
 			RTO = RTO *2;
 			reSend(segment); // retransmission of the segment 
 
