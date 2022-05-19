@@ -14,7 +14,7 @@ public class Demo {
 	
 	public static void main(String[] args) {
         // int packetLoss = Integer.parseInt(args[0]);
-		int packetLoss = 5;
+		int packetLoss = 20;
 
 		AbstractScheduler scheduler= new Scheduler();
 		Network network= new Network(scheduler);
@@ -48,6 +48,7 @@ public class Demo {
     		host2.start();
     		
     		scheduler.run();
+			host2.stop(); // stop the receiver to print the recevied message
     	} catch (Exception e) {
     		System.err.println(e.getMessage());
     		e.printStackTrace(System.err);
