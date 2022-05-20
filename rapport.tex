@@ -89,7 +89,7 @@ Et l'exécution :
 \begin{verbatim}
 $ java reso.examples.selectiverepeat.Demo x
 \end{verbatim}
-(où x est le pourcentage de paquets perdus).\\
+(où x (entier) est le pourcentage de paquets perdus).\\
 Une fois l'exécution terminée les fichiers log et csv sont générés à la racine du projet.
 
 \section{Applications}
@@ -118,7 +118,7 @@ Du côté du receveur, la méthode sendAck permet d'envoyer un acquittement de m
 
 Si un timer arrive à sa fin, le segment associé est ré-envoyé et un nouveau timer est créé. 
 La durée du timer est calculée de la même manière que vue au cours.
-Si l'on a un timeout, la durée de celui ci est doublé et si le receveur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
+Si l'on a un timeout, la durée de celui ci est doublée et si l'envoyeur reçoit un ACK, les valeurs pour R, SRTT, devRTT et RTO (durée du timer) sont recalculées avec les formules indiquées dans le cours.
 
 \subsection{Réception d'un acquittement}
 
