@@ -1,0 +1,12 @@
+\babel@toc {french}{}
+\contentsline {section}{\numberline {1}Construction et exécution}{1}{section.1}%
+\contentsline {section}{\numberline {2}Applications}{1}{section.2}%
+\contentsline {section}{\numberline {3}Selective-repeat}{1}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Envoi d'un message}{1}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Pipelining}{1}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Envoi d'un segment}{1}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Timeout et RTO}{2}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Réception d'un acquittement}{2}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Contrôle de congestion}{2}{section.4}%
+\contentsline {section}{\numberline {5}Bugs rencontrés}{2}{section.5}%
+\contentsline {section}{\numberline {6}Outils}{2}{section.6}%
