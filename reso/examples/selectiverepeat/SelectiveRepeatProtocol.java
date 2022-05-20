@@ -30,7 +30,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	private       double    timeSpent;
 	private       int       seqBase;    // sequence number of the fist packet in the window
 	private       int       seqNum;     // current sequence number
-	private       int       nextSeqNum; // next sequence number in the window ("cursor")
 	private       int[]     seqNumAcked;// array to count the number of ack received for a sequence number
 
 
@@ -50,7 +49,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 		windowSize      = 1;
 		seqBase         = 0;
 		seqNum          = 0;
-		nextSeqNum      = 0;
 		sstresh			= 100;
 	}
 
@@ -116,24 +114,24 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 						}
 					}
 
-					// if(R == -1.0){ // First ACK
-					// 	R = host.getNetwork().getScheduler().getCurrentTime();
-					// 	timeSpent = R;
-					// 	SRTT = R;
-					// 	devRTT = R/2;
-					// 	RTO = SRTT + 4*devRTT;
-					// } else{
-					// 	R = host.getNetwork().getScheduler().getCurrentTime() - timeSpent;
-					// 	timeSpent = host.getNetwork().getScheduler().getCurrentTime();
-					// 	calculateRTO();
-					// }
+					if(R == -1.0){ // First ACK
+						R = host.getNetwork().getScheduler().getCurrentTime();
+						timeSpent = R;
+						SRTT = R;
+						devRTT = R/2;
+						RTO = SRTT + 4*devRTT;
+					} else{
+						R = host.getNetwork().getScheduler().getCurrentTime() - timeSpent;
+						timeSpent = host.getNetwork().getScheduler().getCurrentTime();
+						calculateRTO();
+					}
 				}
-				// else{
-				// 	seqNumAcked[payload.seqNum]++;
-				// 	if(seqNumAcked[payload.seqNum]%3 == 0){
-				// 		windowSize = windowSize/2;
-				// 	}
-				// }
+				else{
+					seqNumAcked[payload.seqNum]++;
+					if(seqNumAcked[payload.seqNum]%3 == 0){
+						windowSize = windowSize/2;
+					}
+				}
 			}	
 
 			// receiver receives a message
@@ -157,7 +155,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 	public void pipeliningSend() throws Exception {
 		while (window.size() < windowSize) {	
 			if(seqNum<messagesList.size()){
-				nextSeqNum++;
 				String message = messagesList.get(seqNum);
 				SelectiveRepeatSegment segment = new SelectiveRepeatSegment(seqNum, message, windowSize);
 				send(segment);
@@ -212,7 +209,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 			window.remove(0);
 			cpt++;
 			seqBase    += 1;
-			nextSeqNum -= 1;
 			forwarded = true;
 		}
 		return forwarded;
