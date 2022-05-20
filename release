@@ -1,0 +1,9 @@
+#!/bin/bash
+mkdir tp-reseaux-clr-2022-gr23
+mkdir tp-reseaux-clr-2022-gr23/src
+mkdir tp-reseaux-clr-2022-gr23/build
+cp reso/examples/selectiverepeat/*.java tp-reseaux-clr-2022-gr23/src/
+cp reso/examples/selectiverepeat/*.class tp-reseaux-clr-2022-gr23/build/
+#cp rapport.pdf tp-reseaux-clr-2022-gr23/
+tar -czf tp-reseaux-clr-2022-gr23.tar.gz tp-reseaux-clr-2022-gr23
+rm -rf tp-reseaux-clr-2022-gr23
