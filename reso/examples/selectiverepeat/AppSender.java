@@ -21,7 +21,7 @@ public class AppSender extends AbstractApplication {
 	}
 
 	public void start() throws Exception {
-		SelectiveRepeatProtocol protocol = new SelectiveRepeatProtocol((IPHost) host, "bob", packetLoss);
+		SelectiveRepeatProtocol protocol = new SelectiveRepeatProtocol((IPHost) host, "sender", packetLoss);
     	ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, protocol);
 		protocol.sendMessage(dst, message);
 	}

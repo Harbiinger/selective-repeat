@@ -8,19 +8,28 @@ public class SelectiveRepeatSegment implements Message {
 	public final String  message; 
 	public       boolean acked;
 	public final int     windowSize;
+	public final double  sentTime;
 	
+	/*
+	 * Constructor for an ack
+	 */
 	public SelectiveRepeatSegment(int seqNum, boolean ack, int windowSize) {
 		this.seqNum     = seqNum;
 		acked           = ack;
 		message         = null;
+		sentTime        = 0;
 		this.windowSize = windowSize;
 	}
 
-	public SelectiveRepeatSegment(int seqNum, String message, int windowSize) {
+	/*
+	 * Constructor for a message
+	 */
+	public SelectiveRepeatSegment(int seqNum, String message, int windowSize, double sentTime) {
 		this.seqNum     = seqNum;
     	this.message    = message;
 		acked           = false;
 		this.windowSize = windowSize;
+		this.sentTime   = sentTime;
   }
 
 	@Override

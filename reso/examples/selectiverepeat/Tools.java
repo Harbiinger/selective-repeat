@@ -18,11 +18,11 @@ public class Tools {
 		}
 	}
 
-	public static void plot(double time, int windowSize){
+	public static void plot(double time, int windowSize, double RTO){
 		try {
 			FileWriter myWriter = new FileWriter("congestionControl.csv", true);
 			BufferedWriter bw = new BufferedWriter(myWriter);
-			bw.write((int) time+ ","+windowSize);
+			bw.write((int) time+ ","+windowSize+","+RTO);
 			bw.newLine();
 			bw.close();
 		} catch (IOException e) {

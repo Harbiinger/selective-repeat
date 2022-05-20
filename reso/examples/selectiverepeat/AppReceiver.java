@@ -16,7 +16,7 @@ public class AppReceiver extends AbstractApplication{
     }
 	
 	public void start() {
-		ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host, "alice", packetLoss));
+		ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host, "receiver", packetLoss));
     }
 	
 	public void stop() {}
