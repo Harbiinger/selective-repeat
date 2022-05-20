@@ -8,7 +8,6 @@ public class SelectiveRepeatSegment implements Message {
 	public final String  message; 
 	public       boolean acked;
 	public final int     windowSize;
-	public final double  sentTime;
 	
 	/*
 	 * Constructor for an ack
@@ -17,19 +16,17 @@ public class SelectiveRepeatSegment implements Message {
 		this.seqNum     = seqNum;
 		acked           = ack;
 		message         = null;
-		sentTime        = 0;
 		this.windowSize = windowSize;
 	}
 
 	/*
 	 * Constructor for a message
 	 */
-	public SelectiveRepeatSegment(int seqNum, String message, int windowSize, double sentTime) {
+	public SelectiveRepeatSegment(int seqNum, String message, int windowSize) {
 		this.seqNum     = seqNum;
     	this.message    = message;
 		acked           = false;
 		this.windowSize = windowSize;
-		this.sentTime   = sentTime;
   }
 
 	@Override

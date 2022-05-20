@@ -47,6 +47,7 @@ public class Demo {
     		host2.start();
     		
     		scheduler.run();
+			host2.stop(); // stop the receiver to print the recevied message
     	} catch (Exception e) {
     		System.err.println(e.getMessage());
     		e.printStackTrace(System.err);

@@ -8,6 +8,7 @@ public class AppReceiver extends AbstractApplication{
 	
 	private final IPLayer ip;
 	private final int     packetLoss;
+	private SelectiveRepeatProtocol protocol;
     	
 	public AppReceiver(IPHost host, int packetLoss) {
 		super(host, "receiver");
@@ -18,7 +19,8 @@ public class AppReceiver extends AbstractApplication{
 	public void start() {
 		ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host, "receiver", packetLoss));
     }
-	
-	public void stop() {}
+
+	public void stop() {
+	}
 	
 }
