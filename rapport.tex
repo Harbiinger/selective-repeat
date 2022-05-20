@@ -130,13 +130,21 @@ Ainsi, au prochain appel de la méhtode verifyWindow, la fenêtre sera avancée 
 Afin de gérer le contrôle de congestion, la taille de la fenêtre est modifié au cours du processus afin d'avoir une taille optimale tout au long de l'envoi.
 Cela se fait lorsque l'envoyeur reçoit un ACK ou lors d'un timeout.
 Lors de la réception d'un ACK, on double la taille de la fenêtre si celle-ci est inférieure au sstresh (fixé à 100 au départ). Si elle est inférieure, on l'incrémente de 1.
-Lors d'un timeout, la taille de fenêtre est fixée à 1 et le sstresh est fixé à la moitié de la dernière valeur de fenêtre. Dans le cas où la fenêtre avait une taille de 1, le sstresh est fixé à 1.
+Lors d'un timeout, la taille de fenêtre est fixée à 1 et le sstresh est fixé à la moitié de la dernière valeur de fenêtre. Dans le cas où la fenêtre avait une taille de 1, le sstresh est fixé à 1.\\
+Voici un graphique qui montre l'évolution de la taille de la fenêtre au fil du processus d'envoi avec une perte de paquet de 20\%. \\
+\includegraphics[height=7cm]{ressources/windowChart.png}
+
+
 
 \section{Bugs rencontrés}
 
 Nous avons remarqués grâce aux logs que le receveur recevait des paquets acquittés. 
 Après avoir testé chaque méthode envoyant des messages, la source du bug n'a toujours pas été découverte car aucune d'entre elles n'envoie de message acquitté. 
-Ce bug a donc été contourné en ajoutant au protocol l'attribut actor permettant de savoir si l'application courrante est l'envoyeur ou le receveur, ce qui est testé lors de la réception d'un message.
+Ce bug a donc été contourné en ajoutant au protocol l'attribut actor permettant de savoir si l'application courrante est l'envoyeur ou le receveur, ce qui est testé lors de la réception d'un message.\\
+
+Malgré avoir suivi la méthode et les calculs de RTO indiqués dans le cours, nous avons pu voir que celui-ci croit beaucoup trop pendant le processus, ce qui mène à un temps de processus disproportionné. Nous n'avons pas su déterminer l'origine de ce problème.\\
+
+La taille de la fenêtre étant recalculée à chaque ACK reçu, le graphique possède une croissance en escalier car car il y a un délai avant que le prochain ACK arrive. 
 
 \section{Outils}
 
