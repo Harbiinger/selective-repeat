@@ -234,11 +234,6 @@ public class SelectiveRepeatProtocol implements IPInterfaceListener {
 				buffer.remove(0);
 				cpt++;
 			}
-
-			// tmp
-			if (segment.seqNum == 92) {
-				System.out.println(data);
-			}
 		}
 	}
 

@@ -17,10 +17,13 @@ public class AppReceiver extends AbstractApplication{
     }
 	
 	public void start() {
-		ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, new SelectiveRepeatProtocol((IPHost) host, "receiver", packetLoss));
+		protocol = new SelectiveRepeatProtocol((IPHost) host, "receiver", packetLoss);
+		ip.addListener(SelectiveRepeatProtocol.IP_PROTO_SELECTIVE_REPEAT, protocol);
     }
 
 	public void stop() {
+		System.out.println("Fully received message :");
+		System.out.println(protocol.getData());
 	}
 	
 }
